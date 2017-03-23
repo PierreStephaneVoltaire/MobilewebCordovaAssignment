@@ -46,9 +46,9 @@ $.when(jqmReady,pgReady).then (function(){
   });
 
   $("#save").on('click',function() {
-    alert(age.val()+" "+email.val()+" "+name.val()+"");
-    var allOk=false;
-    
+  //  alert(age.val()+" "+email.val()+" "+name.val()+"");
+    var allOk=true;
+
     if (age.val()==0) {
 
       allOk=false;
@@ -64,7 +64,8 @@ $.when(jqmReady,pgReady).then (function(){
       allOk=false;
     }
     if(allOk){
-      opendb();}
+      opendb();
+      addEmail(name,email,age,$("#photo").attr("src"));}
     });
 
   });
@@ -72,6 +73,7 @@ $.when(jqmReady,pgReady).then (function(){
   function opendb(){
     var db = null;
     db = window.sqlitePlugin.openDatabase({name: 'demo.db', location: 'default'});
+    console.log("db opened");
     db.transaction(function(tx) {
       tx.executeSql('CREATE TABLE IF NOT EXISTS DemoTable (name, email,age,picture)');
     }, function(error) {
@@ -79,6 +81,18 @@ $.when(jqmReady,pgReady).then (function(){
     }, function() {
       console.log('Populated database OK');
     });}
+
+    function addEmail(dbname,dbemail,dbage,dbpicture) {
+  var  db = window.sqlitePlugin.openDatabase({name: 'demo.db', location: 'default'});
+      db.transaction(function(tx) {
+        tx.executeSql('INSERT INTO DemoTable VALUES (?,?,?,?)', [dbname, dbemail,dbage,dbpicture]);
+      }, function(error) {
+        console.log('Transaction ERROR: ' + error.message);
+      }, function() {
+        console.log('Populated database OK');
+    alert("it works");
+      });
+    }
 
 
     function takePhoto() {

@@ -65,7 +65,7 @@ $.when(jqmReady,pgReady).then (function(){
     }
     if(allOk){
       opendb();
-      addEmail(name,email,age,picture);}
+      addEmail(name,email,age,$("#photo").attr("src"));}
     });
 
   });
@@ -83,13 +83,14 @@ $.when(jqmReady,pgReady).then (function(){
     });}
 
     function addEmail(dbname,dbemail,dbage,dbpicture) {
-      db = window.sqlitePlugin.openDatabase({name: 'demo.db', location: 'default'});
+  var  db = window.sqlitePlugin.openDatabase({name: 'demo.db', location: 'default'});
       db.transaction(function(tx) {
         tx.executeSql('INSERT INTO DemoTable VALUES (?,?,?,?)', [dbname, dbemail,dbage,dbpicture]);
       }, function(error) {
         console.log('Transaction ERROR: ' + error.message);
       }, function() {
         console.log('Populated database OK');
+    alert("it works");
       });
     }
 
