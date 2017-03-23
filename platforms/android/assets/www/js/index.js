@@ -24,74 +24,94 @@ document.addEventListener("deviceready",pgReady.resolve,false);
 
 // We must wait until both objects are resolved!
 $.when(jqmReady,pgReady).then (function(){
-  var savebtn=$("#savePhoto");
+
   var getbtn=$("#getPhoto");
   var clearbtn=$("#clear");
-  var deletebtn=$("#deletePhoto");
   var age=$("#age");
   var email=$("#email");
   var name=$("#name");
 
-  deletebtn.hide();
+  $("#deletePhoto").hide();
   $("#takePhoto").on("click",takePhoto);
-deletebtn.on('click',function(){photo.attr('src', '');} )
-$("#clear").on('click',function() {
-  photo.attr('src','');
-  age.val(0);
-  email.val('');
-  name.val('');
-});
-savebtn.on('click',function() {
-  var allOk=false;
-  alert(email.val().trim().length+"sdgf");
-  if (age.val()==0) {
 
-    allOk=false;
-  }
-  if (email.val().trim().length) {
+  $("#deletePhoto").on('click',function(){photo.removeAttr("src")});
 
-  }
-opendb();
-});
+  $("#clear").on('click',function() {
+    alert("in clear");
+    $("#photo").removeAttr("src");
+    age.val(0);
+    email.val('');
+    name.val('');
+    $("#deletePhoto").hide();
+  });
 
-});
+  $("#save").on('click',function() {
+    alert(age.val()+" "+email.val()+" "+name.val()+"");
+    var allOk=false;
 
-function opendb(){
-  var db = null;
+    if (age.val()==0) {
+
+      allOk=false;
+    }
+    if (email.val().trim().length==0) {
+      allOk=false;
+    //  showPopup("you forgot the email, you fucking failure!!!");
+    }
+    if (name.val().trim().length==0) {
+
+    }
+    if (age.val()==0) {
+      allOk=false;
+    }
+    if(allOk){
+      opendb();}
+    });
+
+  });
+
+  function opendb(){
+    var db = null;
     db = window.sqlitePlugin.openDatabase({name: 'demo.db', location: 'default'});
-db.transaction(function(tx) {
-  tx.executeSql('CREATE TABLE IF NOT EXISTS DemoTable (name, email,age,picture)');
-}, function(error) {
-  console.log('Transaction ERROR: ' + error.message);
-}, function() {
-  console.log('Populated database OK');
-});}
+    db.transaction(function(tx) {
+      tx.executeSql('CREATE TABLE IF NOT EXISTS DemoTable (name, email,age,picture)');
+    }, function(error) {
+      console.log('Transaction ERROR: ' + error.message);
+    }, function() {
+      console.log('Populated database OK');
+    });}
 
 
-function takePhoto() {
-           var options = { quality: 25,
-                           //destinationType: Camera.DestinationType.DATA_URL,
-                           destinationType: Camera.DestinationType.FILE_URI,
-                           cameraDirection: Camera.Direction.FRONT,
-                           encodingType: Camera.EncodingType.JPEG,
-                           correctOrientation: true,
-                           allowEdit: true
-                          };
-           navigator.camera.getPicture(cameraSuccess, cameraError, options);
-       }
+    function takePhoto() {
+      var options = { quality: 25,
+        //destinationType: Camera.DestinationType.DATA_URL,
+        destinationType: Camera.DestinationType.FILE_URI,
+        cameraDirection: Camera.Direction.FRONT,
+        encodingType: Camera.EncodingType.JPEG,
+        correctOrientation: true,
+        allowEdit: true
+      };
+      navigator.camera.getPicture(cameraSuccess, cameraError, options);
+    }
 
-       function cameraSuccess(imageData){
-           // Uncomment the line below to see what you get as imageData:
-           //navigator.notification.alert(imageData, null, "Photo Results", "Ok");
+    function cameraSuccess(imageData){
+      // Uncomment the line below to see what you get as imageData:
+      //navigator.notification.alert(imageData, null, "Photo Results", "Ok");
 
       $("#photo").attr("src",imageData);
 
-           // Use this only if you need raw image data.
-           // You also must activate Camera.DestinationType.DATA_URL option above.
-           //image.src = "data:image/jpeg;base64," + imageData;
-       }
+      $("#deletePhoto").show();
 
-       function cameraError(errorData){
-           navigator.notification.alert("Error: " + JSON.stringify(errorData),
-                                         null, "Camera Error", "Ok");
-       }
+      // Use this only if you need raw image data.
+      // You also must activate Camera.DestinationType.DATA_URL option above.
+      //image.src = "data:image/jpeg;base64," + imageData;
+    }
+
+    function cameraError(errorData){
+      navigator.notification.alert("Error: " + JSON.stringify(errorData),
+      null, "Camera Error", "Ok");
+    }
+
+  /*  function showPopup(msg){
+                      $("#pop").html("<p>"+msg+"</p>").popup("open");
+                      setTimeout(function() $pop.popup("close"), 1000);
+                  }*/
