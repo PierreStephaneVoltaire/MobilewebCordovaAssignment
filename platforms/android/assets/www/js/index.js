@@ -31,7 +31,7 @@ $.when(jqmReady,pgReady).then (function(){
   var age=$("#age");
   var email=$("#email");
   var name=$("#name");
-    var photo=$("#photo");
+
   deletebtn.hide();
   $("#takePhoto").on("click",takePhoto);
 deletebtn.on('click',function(){photo.attr('src', '');} )
@@ -44,7 +44,7 @@ function opendb(){
   $(document).on('deviceready', function() {
     db = window.sqlitePlugin.openDatabase({name: 'demo.db', location: 'default'});
   });
-}
+
 
 db.transaction(function(tx) {
   tx.executeSql('CREATE TABLE IF NOT EXISTS DemoTable (name, email,age,picture)');
@@ -52,26 +52,35 @@ db.transaction(function(tx) {
   console.log('Transaction ERROR: ' + error.message);
 }, function() {
   console.log('Populated database OK');
-});
+});}
 
 
 function takePhoto() {
-  var options = {
-    quality: 50,
-        destinationType: Camera.DestinationType.DATA_URL,
-    cameraDirection: Camera.Direction.FRONT,
-    correctOrientation: true,
-    allowEdit: false
-  };
-  navigator.camera.getPicture(cameraSuccess, cameraError, options);
-}
-function cameraSuccess(imageData){
-  deletebtn.show();
-  photo.attr('src', "data:image/jpeg;base64,"+imageData);
-  var image = document.getElementById('myImage');
-     image.src = "data:image/jpeg;base64," + imageData;
+           var options = { quality: 25,
+                           //destinationType: Camera.DestinationType.DATA_URL,
+                           destinationType: Camera.DestinationType.FILE_URI,
+                           cameraDirection: Camera.Direction.FRONT,
+                           encodingType: Camera.EncodingType.JPEG,
+                           correctOrientation: true,
+                           allowEdit: true
+                          };
+           navigator.camera.getPicture(cameraSuccess, cameraError, options);
+       }
 
-}
-function cameraError(errorData){
-   name.text('some text');
-}
+       function cameraSuccess(imageData){
+           // Uncomment the line below to see what you get as imageData:
+           //navigator.notification.alert(imageData, null, "Photo Results", "Ok");
+alert(imageData);
+navigator.notification.alert(imageData,
+                              null, imageData, "Ok");
+      $("#photo").attr("src",imageData);
+
+           // Use this only if you need raw image data.
+           // You also must activate Camera.DestinationType.DATA_URL option above.
+           //image.src = "data:image/jpeg;base64," + imageData;
+       }
+
+       function cameraError(errorData){
+           navigator.notification.alert("Error: " + JSON.stringify(errorData),
+                                         null, "Camera Error", "Ok");
+       }

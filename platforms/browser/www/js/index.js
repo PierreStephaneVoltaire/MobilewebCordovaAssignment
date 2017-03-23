@@ -33,7 +33,7 @@ $.when(jqmReady,pgReady).then (function(){
   var name=$("#name");
     var photo=$("#photo");
   deletebtn.hide();
-  $("#takePhoto").on("click",takePhoto);
+  $("#takePhoto").on("click",takePhoto;
 deletebtn.on('click',function(){photo.attr('src', '');} )
 
 });
@@ -56,22 +56,29 @@ db.transaction(function(tx) {
 
 
 function takePhoto() {
-  var options = {
-    quality: 50,
-        destinationType: Camera.DestinationType.DATA_URI,
-    cameraDirection: Camera.Direction.FRONT,
-    correctOrientation: true,
-    allowEdit: false
-  };
-  navigator.camera.getPicture(cameraSuccess, cameraError, options);
-}
-function cameraSuccess(imageData){
-  deletebtn.show();
-  photo.attr('src', "data:image/jpeg;base64,"+imageData);
-  var image = document.getElementById('myImage');
-     image.src =  imageData;
+           var options = { quality: 25,
+                           //destinationType: Camera.DestinationType.DATA_URL,
+                           destinationType: Camera.DestinationType.FILE_URI,
+                           cameraDirection: Camera.Direction.FRONT,
+                           encodingType: Camera.EncodingType.JPEG,
+                           correctOrientation: true,
+                           allowEdit: true
+                          };
+           navigator.camera.getPicture(cameraSuccess, cameraError, options);
+       }
 
-}
-function cameraError(errorData){
-   name.text('some text');
-}
+       function cameraSuccess(imageData){
+           // Uncomment the line below to see what you get as imageData:
+           //navigator.notification.alert(imageData, null, "Photo Results", "Ok");
+
+        photo.attr("src",imageData);
+
+           // Use this only if you need raw image data.
+           // You also must activate Camera.DestinationType.DATA_URL option above.
+           //image.src = "data:image/jpeg;base64," + imageData;
+       }
+
+       function cameraError(errorData){
+           navigator.notification.alert("Error: " + JSON.stringify(errorData),
+                                         null, "Camera Error", "Ok");
+       }
