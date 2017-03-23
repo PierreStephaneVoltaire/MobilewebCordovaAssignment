@@ -102,3 +102,7 @@ function takePhoto() {
            navigator.notification.alert("Error: " + JSON.stringify(errorData),
                                          null, "Camera Error", "Ok");
        }
+ function showPopup(msg){
+                   $("#pop").html("<p>"+msg+"</p>").popup("open");
+                   setTimeout(function() $pop.popup("close"), 1000);
+               }
