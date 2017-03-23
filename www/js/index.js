@@ -43,15 +43,22 @@ $("#clear").on('click',function() {
 });
 savebtn.on('click',function() {
   var allOk=false;
-  alert(email.val().trim().length+"sdgf");
+
   if (age.val()==0) {
 
     allOk=false;
   }
-  if (email.val().trim().length) {
+  if (email.val().trim().length==0) {
+  allOk=false;
+  }
+  if (name.val().trim().length==0) {
 
   }
-opendb();
+  if (age.val()==0) {
+  allOk=false;
+  }
+if(allOk){
+opendb();}
 });
 
 });
