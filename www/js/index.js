@@ -23,29 +23,44 @@ $(document).on("pagecreate",  jqmReady.resolve);
 document.addEventListener("deviceready",pgReady.resolve,false);
 
 // We must wait until both objects are resolved!
+var getbtn=null;
+var clearbtn=null;
+var deletebtn=null;
+var uploadbtn=null;
+var savebtn=null;
+var photo=null;
+var age=null;
+var email=null;
+var name=null;
+
+
 $.when(jqmReady,pgReady).then (function(){
 
-  var getbtn=$("#getPhoto");
-  var clearbtn=$("#clear");
-  var age=$("#age");
-  var email=$("#email");
-  var name=$("#name");
+  getbtn=$("#getPhoto");
+   clearbtn=$("#clear");
+uploadbtn=$("#takePhoto");
+photo=  $("#photo");
+deletebtn=  $("#deletePhoto");
+   age=$("#age");
+   email=$("#email");
+   name=$("#name");
+   savebtn=$("#save");
 
-  $("#deletePhoto").hide();
-  $("#takePhoto").on("click",takePhoto);
+  deletebtn.hide();
+  uploadbtn.on("click",takePhoto);
 
-  $("#deletePhoto").on('click',function(){photo.removeAttr("src")});
+  deletebtn.on('click',function(){photo.attr('src', '');});
+//getbtn.on('click', getEmail(email.val()));
+  clearbtn.on('click',function() {
 
-  $("#clear").on('click',function() {
-    alert("in clear");
-    $("#photo").removeAttr("src");
+  photo.attr('src', '');
     age.val(0);
     email.val('');
     name.val('');
-    $("#deletePhoto").hide();
+    deletebtn.hide();
   });
 
-  $("#save").on('click',function() {
+  savebtn.on('click',function() {
   //  alert(age.val()+" "+email.val()+" "+name.val()+"");
     var allOk=true;
 
@@ -65,7 +80,7 @@ $.when(jqmReady,pgReady).then (function(){
     }
     if(allOk){
       opendb();
-      addEmail(name,email,age,$("#photo").attr("src"));}
+      addEmail(name,email,age,photo.attr("src"));}
     });
 
   });
@@ -81,6 +96,18 @@ $.when(jqmReady,pgReady).then (function(){
     }, function() {
       console.log('Populated database OK');
     });}
+
+    function getEmail(email) {
+      db.executeSql('SELECT * FROM DemoTable WHERE email like ?', [email], function(rs) {
+  photo.attr('src', rs.rows.item(0).picture);
+  age=rs.rows.item(0).age;
+  var email=rs.rows.item(0).email;
+  var name=rs.rows.item(0).name;
+}, function(error) {
+  console.log('SELECT SQL statement ERROR: ' + error.message);
+});
+
+    }
 
     function addEmail(dbname,dbemail,dbage,dbpicture) {
   var  db = window.sqlitePlugin.openDatabase({name: 'demo.db', location: 'default'});
@@ -111,9 +138,9 @@ $.when(jqmReady,pgReady).then (function(){
       // Uncomment the line below to see what you get as imageData:
       //navigator.notification.alert(imageData, null, "Photo Results", "Ok");
 
-      $("#photo").attr("src",imageData);
+      photo.attr("src",imageData);
 
-      $("#deletePhoto").show();
+      deletebtn.show();
 
       // Use this only if you need raw image data.
       // You also must activate Camera.DestinationType.DATA_URL option above.
