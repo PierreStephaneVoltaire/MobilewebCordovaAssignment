@@ -19,77 +19,62 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.js"></script>
-
-
-
 </head>
 <body>
-
-
   <script type="text/javascript" src="cordova.js"></script>
-
   <div data-role="page" id="pageone"   >
     <div data-role="header">
-
     </div>
-
     <div data-role="main" class="ui-content">
       <form>
-
         <div class="ui-field-contain">
-          <label for="name">Full name:</label><br>
+          <label for="name">Full name:</label>
+          <br>
           <input type="text" name="name" id="name" value="" placeholder="Enter your full name">
         </div>
+        <div data-role="popup" id="pop">
+        </div>
         <div class="ui-field-contain">
-          <label for="email">Email:</label><br>
+          <label for="email">Email:</label>
+          <br>
           <input type="email" name="email" id="email" value="" placeholder="Enter your email">
-<div id="pop" data-role="popup" data-position="window" data-transition="true" >
-
-</div>
-    </div>
-
-        <div class="ui-field-contain">
-          <label for="age">age:</label>
-          <input type="range" name="age" id="age" value="0" min="0" max="123">
         </div>
         <div class="ui-field-contain">
-          <a id="takePhoto" class="ui-btn ui-btn-mini ui-icon-camera ui-btn-icon-left ui-corner-all" href="#" role="button">
-            click to upload
-          </a>
-          <a id="deletePhoto" class="ui-btn ui-btn-mini ui-icon-camera ui-btn-icon-left ui-corner-all" href="#" role="button">
-            delete
-          </a>
-          <img id = "photo"></img>
+          <label for="age">Age:</label>
+          <input type="range" name="age" id="age" value="20" min="20" max="123">
         </div>
-
         <div class="ui-field-contain">
-          <a id="save" class="ui-btn ui-icon-star ui-btn-icon-left" href="#" role="button">
-            save info
-          </a>
-          <a id="getPhoto" class="ui-btn ui-corner-all" href="#" role="button">
-            get info
-          </a>
-          <a id="clear"  class="ui-btn ui-corner-all" href="#" role="button">
-            clear
-          </a>
-        </form>
+          <div class="ui-grid-a">
+            <div class="ui-block-a">
+              <a id="takePhoto" class="ui-btn ui-icon-camera ui-btn-icon-left ui-corner-all" href="#" role="button">
+                click to upload
+              </a>
+            </div>
+            <div class="ui-block-b">
+              <a id="deletePhoto" class="ui-btn ui-icon-delete ui-btn-icon-left ui-corner-all" href="#" role="button">
+                delete
+              </a>
+            </div>
+            <img id = "photo"></img>
+          </div>
+          <div class="ui-field-contain">
+            <a id="save" class="ui-btn ui-icon-star ui-btn-icon-left" href="#" role="button">
+              save info
+            </a>
+            <a id="getPhoto" class="ui-btn ui-icon-action ui-btn-icon-left ui-corner-all" href="#" role="button">
+              get info
+            </a>
+            <a id="clear"  class="ui-btn ui-icon-recycle ui-btn-icon-left  ui-corner-all" href="#" role="button">
+              clear
+            </a>
+          </form>
+        </div>
       </div>
-
-
+      <div data-role="footer">
+      </div>
     </div>
-
-    <div data-role="footer">
-
-    </div>
-  </div>
-
-
-  <script type="text/javascript" src="js/index.js"></script>
-
-  <script type="text/javascript" >
-
-
-
-  </script>
-</body>
-</html>
+    <script type="text/javascript" src="js/index.js"></script>
+    <script type="text/javascript" >
+    </script>
+  </body>
+  </html>

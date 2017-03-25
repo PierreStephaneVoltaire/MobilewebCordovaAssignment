@@ -31,37 +31,37 @@ var savebtn=null;
 var photo=null;
 var age=null;
 var email=null;
-var name=null;
+var sname=null;
 
 
 $.when(jqmReady,pgReady).then (function(){
 
   getbtn=$("#getPhoto");
-   clearbtn=$("#clear");
-uploadbtn=$("#takePhoto");
-photo=  $("#photo");
-deletebtn=  $("#deletePhoto");
-   age=$("#age");
-   email=$("#email");
-   name=$("#name");
-   savebtn=$("#save");
+  clearbtn=$("#clear");
+  uploadbtn=$("#takePhoto");
+  photo=  $("#photo");
+  deletebtn=  $("#deletePhoto");
+  age=$("#age");
+  email=$("#email");
+  sname=$("#name");
+  savebtn=$("#save");
 
   deletebtn.hide();
   uploadbtn.on("click",takePhoto);
 
   deletebtn.on('click',function(){photo.attr('src', '');});
-//getbtn.on('click', getEmail(email.val()));
+  getbtn.on('click', getEmail(email.val()));
   clearbtn.on('click',function() {
 
-  photo.attr('src', '');
+    photo.attr('src', '');
     age.val(0);
     email.val('');
-    name.val('');
+    sname.val('');
     deletebtn.hide();
   });
 
   savebtn.on('click',function() {
-  //  alert(age.val()+" "+email.val()+" "+name.val()+"");
+
     var allOk=true;
 
     if (age.val()==0) {
@@ -70,9 +70,9 @@ deletebtn=  $("#deletePhoto");
     }
     if (email.val().trim().length==0) {
       allOk=false;
-      //  showPopup("you forgot the email, you fucking failure!!!");
+      showPopup("you forgot the email");
     }
-    if (name.val().trim().length==0) {
+    if (sname.val().trim().length==0) {
 
     }
     if (age.val()==0) {
@@ -80,7 +80,7 @@ deletebtn=  $("#deletePhoto");
     }
     if(allOk){
       opendb();
-      addEmail(name,email,age,photo.attr("src"));}
+      addEmail(sname,email,age,photo.attr("src"));}
     });
 
   });
@@ -90,41 +90,49 @@ deletebtn=  $("#deletePhoto");
     db = window.sqlitePlugin.openDatabase({name: 'demo.db', location: 'default'});
     console.log("db opened");
     db.transaction(function(tx) {
-      tx.executeSql('CREATE TABLE IF NOT EXISTS DemoTable (name, email,age,picture)');
+      tx.executeSql('CREATE TABLE IF NOT EXISTS DemoTable (name TEXT, email TEXT PRIMARY KEY,age INT,picture TEXT)');
     }, function(error) {
       console.log('Transaction ERROR: ' + error.message);
+      console.log("something went wrong");
     }, function() {
       console.log('Populated database OK');
     });}
 
     function getEmail(email) {
+      var db=null;
+        db = window.sqlitePlugin.openDatabase({name: 'demo.db', location: 'default'});
       db.executeSql('SELECT * FROM DemoTable WHERE email like ?', [email], function(rs) {
-  photo.attr('src', rs.rows.item(0).picture);
-  age=rs.rows.item(0).age;
-  var email=rs.rows.item(0).email;
-  var name=rs.rows.item(0).name;
-}, function(error) {
-  console.log('SELECT SQL statement ERROR: ' + error.message);
-});
+        photo.attr('src', rs.rows.item(0).picture);
+        console.log(rs.rows.item(0).picture);
+        age=rs.rows.item(0).age;
+        console.log(rs.rows.item(0).age);
+        email=rs.rows.item(0).email;
+        console.log(rs.rows.item(0).email);
+        sname=rs.rows.item(0).name;
+        console.log(rs.rows.item(0).name);
+      }, function(error) {
+        console.log('SELECT SQL statement ERROR: ' + error.message);
+      });
 
     }
 
     function addEmail(dbname,dbemail,dbage,dbpicture) {
-  var  db = window.sqlitePlugin.openDatabase({name: 'demo.db', location: 'default'});
+      var  db = window.sqlitePlugin.openDatabase({name: 'demo.db', location: 'default'});
       db.transaction(function(tx) {
         tx.executeSql('INSERT INTO DemoTable VALUES (?,?,?,?)', [dbname, dbemail,dbage,dbpicture]);
       }, function(error) {
         console.log('Transaction ERROR: ' + error.message);
       }, function() {
         console.log('Populated database OK');
-    alert("it works");
+        alert('it works!!! ');
+
       });
     }
 
 
     function takePhoto() {
       var options = { quality: 25,
-        //destinationType: Camera.DestinationType.DATA_URL,
+
         destinationType: Camera.DestinationType.FILE_URI,
         cameraDirection: Camera.Direction.FRONT,
         encodingType: Camera.EncodingType.JPEG,
@@ -139,12 +147,9 @@ deletebtn=  $("#deletePhoto");
       //navigator.notification.alert(imageData, null, "Photo Results", "Ok");
 
       photo.attr("src",imageData);
-
+console.log("the picture:",imageData);
       deletebtn.show();
 
-      // Use this only if you need raw image data.
-      // You also must activate Camera.DestinationType.DATA_URL option above.
-      //image.src = "data:image/jpeg;base64," + imageData;
     }
 
     function cameraError(errorData){
@@ -152,7 +157,7 @@ deletebtn=  $("#deletePhoto");
       null, "Camera Error", "Ok");
     }
 
-    /*  function showPopup(msg){
-    $("#pop").html("<p>"+msg+"</p>").popup("open");
-    setTimeout(function() $pop.popup("close"), 1000);
-  }*/
+    function showPopup(msg){
+      $("#pop").html("<p>"+msg+"</p>").popup("open");
+      setTimeout(function() {$("#pop").popup("close"), 10000});
+    }
