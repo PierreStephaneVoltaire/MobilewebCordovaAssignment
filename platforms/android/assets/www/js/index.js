@@ -32,7 +32,7 @@ var photo=null;
 var age=null;
 var email=null;
 var sname=null;
-    var db=null;
+var db=null;
 
 $.when(jqmReady,pgReady).then (function(){
 
@@ -51,9 +51,9 @@ $.when(jqmReady,pgReady).then (function(){
 
   deletebtn.on('click',function(){photo.attr('src', '');});
 
-getbtn.on('click', function() {
-  getPicture(email.val())
-});
+  getbtn.on('click', function() {
+    getPicture(email.val())
+  });
 
   clearbtn.on('click',function() {
 
@@ -101,10 +101,7 @@ getbtn.on('click', function() {
     });}
 
     function getPicture(e) {
-      console.log(e);
-          db = window.sqlitePlugin.openDatabase({name: 'demo.db', location: 'default'});
-      db.executeSql('SELECT * FROM DemoTable WHERE email ='+e, function(rs) {
-        console.log(rs)
+      db.executeSql('SELECT * FROM DemoTable WHERE email like "' + e+ '"', [], function(rs) {
         photo.attr('src', rs.rows.item(0).picture);
         console.log(rs.rows.item(0).picture);
         age=rs.rows.item(0).age;
@@ -113,11 +110,13 @@ getbtn.on('click', function() {
         console.log(rs.rows.item(0).email);
         sname=rs.rows.item(0).name;
         console.log(rs.rows.item(0).name);
-      }, function(error) {
-        console.log('SELECT SQL statement ERROR: ' + error.message);
-      });
 
+      }, function(error) {
+        navigator.notification.alert("this email does not exist", null, "DB Error", "Ok");
+      });
     }
+
+
 
     function addEmail(dbname,dbemail,dbage,dbpicture) {
 
@@ -125,12 +124,12 @@ getbtn.on('click', function() {
         tx.executeSql('INSERT INTO DemoTable VALUES (?,?,?,?)', [dbname, dbemail,dbage,dbpicture]);
       }, function(error) {
         console.log('Transaction ERROR: ' + error.message);
-            navigator.notification.alert("this email already exists", null, "DB Error", "Ok");
+        navigator.notification.alert("this email already exists", null, "DB Error", "Ok");
       }, function() {
         console.log('added to db');
 
-      navigator.notification.alert(dbemail+" details were successfully added to the db", null, "DB Results", "Ok");
-deletebtn.hide();
+        navigator.notification.alert(dbemail+" details were successfully added to the db", null, "DB Results", "Ok");
+        deletebtn.hide();
       });
     }
 
@@ -152,7 +151,7 @@ deletebtn.hide();
       //navigator.notification.alert(imageData, null, "Photo Results", "Ok");
 
       photo.attr("src",imageData);
-console.log("the picture:",imageData);
+      console.log("the picture:",imageData);
       deletebtn.show();
 
     }
