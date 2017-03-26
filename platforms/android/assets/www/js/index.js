@@ -32,7 +32,7 @@ var photo=null;
 var age=null;
 var email=null;
 var sname=null;
-
+    var db=null;
 
 $.when(jqmReady,pgReady).then (function(){
 
@@ -50,11 +50,15 @@ $.when(jqmReady,pgReady).then (function(){
   uploadbtn.on("click",takePhoto);
 
   deletebtn.on('click',function(){photo.attr('src', '');});
-  getbtn.on('click', getEmail(email.val()));
+
+getbtn.on('click', function() {
+  getPicture(email.val())
+});
+
   clearbtn.on('click',function() {
 
     photo.attr('src', '');
-    age.val(0);
+    age.val(20);
     email.val('');
     sname.val('');
     deletebtn.hide();
@@ -64,29 +68,27 @@ $.when(jqmReady,pgReady).then (function(){
 
     var allOk=true;
 
-    if (age.val()==0) {
-
-      allOk=false;
-    }
     if (email.val().trim().length==0) {
       allOk=false;
       showPopup("you forgot the email");
     }
     if (sname.val().trim().length==0) {
-
+      allOk=false;
+      showPopup("you forgot the name");
     }
     if (age.val()==0) {
       allOk=false;
+      showPopup("you forgot the age");
     }
     if(allOk){
       opendb();
-      addEmail(sname,email,age,photo.attr("src"));}
+      addEmail(sname.val(),email.val(),age.val(),photo.attr("src"));}
     });
 
   });
 
   function opendb(){
-    var db = null;
+
     db = window.sqlitePlugin.openDatabase({name: 'demo.db', location: 'default'});
     console.log("db opened");
     db.transaction(function(tx) {
@@ -98,10 +100,11 @@ $.when(jqmReady,pgReady).then (function(){
       console.log('Populated database OK');
     });}
 
-    function getEmail(email) {
-      var db=null;
-        db = window.sqlitePlugin.openDatabase({name: 'demo.db', location: 'default'});
-      db.executeSql('SELECT * FROM DemoTable WHERE email like ?', [email], function(rs) {
+    function getPicture(e) {
+      console.log(e);
+          db = window.sqlitePlugin.openDatabase({name: 'demo.db', location: 'default'});
+      db.executeSql('SELECT * FROM DemoTable WHERE email ='+e, function(rs) {
+        console.log(rs)
         photo.attr('src', rs.rows.item(0).picture);
         console.log(rs.rows.item(0).picture);
         age=rs.rows.item(0).age;
@@ -117,15 +120,17 @@ $.when(jqmReady,pgReady).then (function(){
     }
 
     function addEmail(dbname,dbemail,dbage,dbpicture) {
-      var  db = window.sqlitePlugin.openDatabase({name: 'demo.db', location: 'default'});
+
       db.transaction(function(tx) {
         tx.executeSql('INSERT INTO DemoTable VALUES (?,?,?,?)', [dbname, dbemail,dbage,dbpicture]);
       }, function(error) {
         console.log('Transaction ERROR: ' + error.message);
+            navigator.notification.alert("this email already exists", null, "DB Error", "Ok");
       }, function() {
-        console.log('Populated database OK');
-        alert('it works!!! ');
+        console.log('added to db');
 
+      navigator.notification.alert(dbemail+" details were successfully added to the db", null, "DB Results", "Ok");
+deletebtn.hide();
       });
     }
 
