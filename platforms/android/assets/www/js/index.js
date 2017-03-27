@@ -18,11 +18,8 @@
 */
 var jqmReady=$.Deferred();
 var pgReady=$.Deferred();
-
 $(document).on("pagecreate",  jqmReady.resolve);
 document.addEventListener("deviceready",pgReady.resolve,false);
-
-// We must wait until both objects are resolved!
 var getbtn=null;
 var clearbtn=null;
 var deletebtn=null;
@@ -33,9 +30,7 @@ var age=null;
 var email=null;
 var sname=null;
 var db=null;
-
 $.when(jqmReady,pgReady).then (function(){
-
   getbtn=$("#getPhoto");
   clearbtn=$("#clear");
   uploadbtn=$("#takePhoto");
@@ -45,50 +40,46 @@ $.when(jqmReady,pgReady).then (function(){
   email=$("#email");
   sname=$("#name");
   savebtn=$("#save");
-
   deletebtn.hide();
   uploadbtn.on("click",takePhoto);
-
   deletebtn.on('click',function(){photo.attr('src', '');});
-
   getbtn.on('click', function() {
-    getPicture(email.val())
+    if (email.val().trim().length==0) {
+      showPopup("email cannot be empty");
+    }
+    else{
+    getPicture(email.val());}
   });
-
   clearbtn.on('click',function() {
-
     photo.attr('src', '');
     age.val(20);
     email.val('');
     sname.val('');
     deletebtn.hide();
   });
-
   savebtn.on('click',function() {
-
     var allOk=true;
-
+    var errmsg="";
     if (email.val().trim().length==0) {
       allOk=false;
-      showPopup("you forgot the email");
+
+      errmsg+="email cannot be empty";
     }
     if (sname.val().trim().length==0) {
       allOk=false;
-      showPopup("you forgot the name");
+      errmsg+="name cannot be empty";
     }
     if (age.val()==0) {
       allOk=false;
-      showPopup("you forgot the age");
+        errmsg+="age cannot be empty";
     }
     if(allOk){
       opendb();
       addEmail(sname.val(),email.val(),age.val(),photo.attr("src"));}
+      else{showPopup(errmsg);}
     });
-
   });
-
   function opendb(){
-
     db = window.sqlitePlugin.openDatabase({name: 'demo.db', location: 'default'});
     console.log("db opened");
     db.transaction(function(tx) {
@@ -99,27 +90,17 @@ $.when(jqmReady,pgReady).then (function(){
     }, function() {
       console.log('Populated database OK');
     });}
-
     function getPicture(e) {
       db.executeSql('SELECT * FROM DemoTable WHERE email like "' + e+ '"', [], function(rs) {
         photo.attr('src', rs.rows.item(0).picture);
-        console.log(rs.rows.item(0).picture);
-        age=rs.rows.item(0).age;
-        console.log(rs.rows.item(0).age);
-        email=rs.rows.item(0).email;
-        console.log(rs.rows.item(0).email);
-        sname=rs.rows.item(0).name;
-        console.log(rs.rows.item(0).name);
-
+        age.val(rs.rows.item(0).age);
+        email.val(rs.rows.item(0).email);
+        sname.val(rs.rows.item(0).name);
       }, function(error) {
-        navigator.notification.alert("this email does not exist", null, "DB Error", "Ok");
+          showPopup("email does not exist");
       });
     }
-
-
-
     function addEmail(dbname,dbemail,dbage,dbpicture) {
-
       db.transaction(function(tx) {
         tx.executeSql('INSERT INTO DemoTable VALUES (?,?,?,?)', [dbname, dbemail,dbage,dbpicture]);
       }, function(error) {
@@ -127,16 +108,12 @@ $.when(jqmReady,pgReady).then (function(){
         navigator.notification.alert("this email already exists", null, "DB Error", "Ok");
       }, function() {
         console.log('added to db');
-
-        navigator.notification.alert(dbemail+" details were successfully added to the db", null, "DB Results", "Ok");
+        navigator.notification.alert("information saved", null, "Save info", "Ok");
         deletebtn.hide();
       });
     }
-
-
     function takePhoto() {
       var options = { quality: 25,
-
         destinationType: Camera.DestinationType.FILE_URI,
         cameraDirection: Camera.Direction.FRONT,
         encodingType: Camera.EncodingType.JPEG,
@@ -145,17 +122,11 @@ $.when(jqmReady,pgReady).then (function(){
       };
       navigator.camera.getPicture(cameraSuccess, cameraError, options);
     }
-
     function cameraSuccess(imageData){
-      // Uncomment the line below to see what you get as imageData:
-      //navigator.notification.alert(imageData, null, "Photo Results", "Ok");
-
       photo.attr("src",imageData);
       console.log("the picture:",imageData);
       deletebtn.show();
-
     }
-
     function cameraError(errorData){
       navigator.notification.alert("Error: " + JSON.stringify(errorData),
       null, "Camera Error", "Ok");
@@ -163,5 +134,5 @@ $.when(jqmReady,pgReady).then (function(){
 
     function showPopup(msg){
       $("#pop").html("<p>"+msg+"</p>").popup("open");
-      setTimeout(function() {$("#pop").popup("close"), 10000});
+      setTimeout(function() {$("#pop").popup("close"), 3000});
     }
