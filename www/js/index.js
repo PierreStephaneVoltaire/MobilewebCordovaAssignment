@@ -66,15 +66,15 @@ deletebtn.hide();});
       if (email.val().trim().length==0) {
 
 
-        errmsg+="email cannot be empty";
+        errmsg+="email cannot be empty\n";
       }
       if (sname.val().trim().length==0) {
 
-        errmsg+="name cannot be empty";
+        errmsg+="name cannot be empty\n";
       }
       if (age.val()==0) {
 
-        errmsg+="age cannot be empty";
+        errmsg+="age cannot be empty\n";
       }
 
       if(errmsg.length<1){
