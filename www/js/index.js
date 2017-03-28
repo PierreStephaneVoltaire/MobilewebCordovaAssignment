@@ -146,6 +146,6 @@ deletebtn.hide();});
 
       function showPopup(msg){
         $pop.html("<p>"+msg+"</p>").popup("open");
-        setTimeout(function() {$pop.popup("close"), 3000});
+        setTimeout(function() {$pop.popup("close")}, 3000);
       }
 }
