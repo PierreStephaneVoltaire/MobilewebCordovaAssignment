@@ -20,36 +20,38 @@ var jqmReady=$.Deferred();
 var pgReady=$.Deferred();
 $(document).on("pagecreate",  jqmReady.resolve);
 document.addEventListener("deviceready",pgReady.resolve,false);
-var getbtn=null;
-var clearbtn=null;
-var deletebtn=null;
-var uploadbtn=null;
-var savebtn=null;
-var photo=null;
-var age=null;
-var email=null;
-var sname=null;
-var db=null;
-$.when(jqmReady,pgReady).then (function(){
-  getbtn=$("#getPhoto");
-  clearbtn=$("#clear");
-  uploadbtn=$("#takePhoto");
-  photo=  $("#photo");
-  deletebtn=  $("#deletePhoto");
-  age=$("#age");
-  email=$("#email");
-  sname=$("#name");
+
+$.when(jqmReady,pgReady).then (initApp);
+function initApp(){
+  var getbtn=$("#getPhoto");
+  var clearbtn=$("#clear");
+  var uploadbtn=$("#takePhoto");
+  var photo=  $("#photo");
+  var deletebtn=  $("#deletePhoto");
+  var age=$("#age");
+  var email=$("#email");
+  var sname=$("#name");
+  var db=null;
+  var $pop=$("#pop");
+
+  var emptyPhoto=photo.attr("src");
+
   savebtn=$("#save");
   deletebtn.hide();
   uploadbtn.on("click",takePhoto);
-  deletebtn.on('click',function(){photo.attr('src', '');});
+  deletebtn.on('click',function(){photo.prop('src', '');
+deletebtn.hide();});
+
   getbtn.on('click', function() {
-    if (email.val().trim().length==0) {
-      showPopup("email cannot be empty");
+    var em=email.val().trim();
+
+    if (em.length==0) {
+      showPopup("email cannot be empty");return;
     }
     else{
       getPicture(email.val());}
     });
+
     clearbtn.on('click',function() {
       photo.attr('src', '');
       age.val(20);
@@ -57,28 +59,33 @@ $.when(jqmReady,pgReady).then (function(){
       sname.val('');
       deletebtn.hide();
     });
+
     savebtn.on('click',function() {
       var allOk=true;
       var errmsg="";
       if (email.val().trim().length==0) {
-        allOk=false;
+
 
         errmsg+="email cannot be empty";
       }
       if (sname.val().trim().length==0) {
-        allOk=false;
+
         errmsg+="name cannot be empty";
       }
       if (age.val()==0) {
-        allOk=false;
+
         errmsg+="age cannot be empty";
       }
-      if(allOk){
+
+      if(errmsg.length<1){
         opendb();
-        addEmail(sname.val(),email.val(),age.val(),photo.attr("src"));}
+        var ph = photo.prop("src");
+        if (ph == emptyPhoto) { ph="";}
+
+        addEmail(sname.val(),email.val(),age.val(),ph);}
         else{showPopup(errmsg);}
       });
-    });
+
     function opendb(){
       db = window.sqlitePlugin.openDatabase({name: 'demo.db', location: 'default'});
       console.log("db opened");
@@ -90,20 +97,24 @@ $.when(jqmReady,pgReady).then (function(){
       }, function() {
         console.log('Populated database OK');
       });}
+
       function getPicture(e) {
         db.executeSql('SELECT * FROM DemoTable WHERE email like "' + e+ '"', [], function(rs) {
-          photo.attr('src', rs.rows.item(0).picture);
+          if (rs.rows.length < 1) {showPopup("email does not exist"); return;}
+          var ph= rs.rows.item(0).picture;
+          if (ph.length<1) {ph=emptyPhoto;}
+          photo.prop('src', ph);
           age.val(rs.rows.item(0).age);
           email.val(rs.rows.item(0).email);
           sname.val(rs.rows.item(0).name);
           deletebtn.show();
         }, function(error) {
-          showPopup("email does not exist");
+          showPopup("email does not exist");return;
         });
       }
       function addEmail(dbname,dbemail,dbage,dbpicture) {
         db.transaction(function(tx) {
-          tx.executeSql('INSERT INTO DemoTable VALUES (?,?,?,?)', [dbname, dbemail,dbage,dbpicture]);
+          tx.executeSql('REPLACE INTO  DemoTable VALUES (?,?,?,?)', [dbname, dbemail,dbage,dbpicture]);
         }, function(error) {
           console.log('Transaction ERROR: ' + error.message);
           navigator.notification.alert("this email already exists", null, "DB Error", "Ok");
@@ -134,6 +145,7 @@ $.when(jqmReady,pgReady).then (function(){
       }
 
       function showPopup(msg){
-        $("#pop").html("<p>"+msg+"</p>").popup("open");
-        setTimeout(function() {$("#pop").popup("close"), 3000});
+        $pop.html("<p>"+msg+"</p>").popup("open");
+        setTimeout(function() {$pop.popup("close"), 3000});
       }
+}
