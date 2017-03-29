@@ -16,136 +16,165 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-var jqmReady=$.Deferred();
-var pgReady=$.Deferred();
-$(document).on("pagecreate",  jqmReady.resolve);
-document.addEventListener("deviceready",pgReady.resolve,false);
+   var jqmReady = $.Deferred();
+                var pgReady = $.Deferred();
+                $(document).on("pagecreate", jqmReady.resolve);
+                document.addEventListener("deviceready", pgReady.resolve, false);
 
-$.when(jqmReady,pgReady).then (initApp);
-function initApp(){
-  var getbtn=$("#getPhoto");
-  var clearbtn=$("#clear");
-  var uploadbtn=$("#takePhoto");
-  var photo=  $("#photo");
-  var deletebtn=  $("#deletePhoto");
-  var age=$("#age");
-  var email=$("#email");
-  var sname=$("#name");
-  var db=null;
-  var $pop=$("#pop");
+                $.when(jqmReady, pgReady).then(initApp);
+                function initApp() {
+                    var getbtn = $("#getPhoto");
+                    var clearbtn = $("#clear");
+                    var uploadbtn = $("#takePhoto");
+                    var photo = $("#photo");
+                    var deletebtn = $("#deletePhoto");
+                    var age = $("#age");
+                    var email = $("#email");
+                    var sname = $("#name");
+                    var db = null;
+                    var $pop = $("#pop");
 
-  var emptyPhoto=photo.attr("src");
+                    var emptyPhoto = photo.attr("src");
 
-  savebtn=$("#save");
-  deletebtn.hide();
-  uploadbtn.on("click",takePhoto);
-  deletebtn.on('click',function(){photo.prop('src', '');
-deletebtn.hide();});
+                    savebtn = $("#save");
+                    deletebtn.hide();
+                    uploadbtn.on("click", takePhoto);
+                    deletebtn.on('click', function () {
+                        photo.prop('src', '');
+                        deletebtn.hide();
+                    });
 
-  getbtn.on('click', function() {
-    var em=email.val().trim();
+                    getbtn.on('click', function () {
+                        var em = email.val().trim();
 
-    if (em.length==0) {
-      showPopup("email cannot be empty");return;
-    }
-    else{
-      getPicture(email.val());}
-    });
+                        if (em.length == 0) {
+                            showPopup("email cannot be empty");
+                            return;
+                        } else {
+                            getPicture(email.val());
+                        }
+                    });
 
-    clearbtn.on('click',function() {
-      photo.attr('src', '');
-      age.val(20);
-      email.val('');
-      sname.val('');
-      deletebtn.hide();
-    });
+                    clearbtn.on('click', function () {
+                        photo.attr('src', '');
+                        age.val(20);
+                        email.val('');
+                        sname.val('');
+                        deletebtn.hide();
+                    });
 
-    savebtn.on('click',function() {
-      var allOk=true;
-      var errmsg="";
-      if (email.val().trim().length==0) {
+                    savebtn.on('click', function () {
+                        var allOk = true;
+                        var errmsg = "";
+
+                        var filter = /^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-z0-9]{2,4}$/;
 
 
-        errmsg+="email cannot be empty\n";
-      }
-      if (sname.val().trim().length==0) {
+                        if (email.val().trim().length == 0) {
 
-        errmsg+="name cannot be empty\n";
-      }
-      if (age.val()==0) {
 
-        errmsg+="age cannot be empty\n";
-      }
+                            errmsg += "email cannot be empty" + "\n";
+                        } else if (!filter.test(email.val())) {
+                            errmsg += "invalid email" + "\n";
+                        }
+                        if (sname.val().trim().length == 0) {
 
-      if(errmsg.length<1){
-        opendb();
-        var ph = photo.prop("src");
-        if (ph == emptyPhoto) { ph="";}
+                            errmsg += "name cannot be empty" + "\n";
+                        }
+                        if (age.val() == 0) {
 
-        addEmail(sname.val(),email.val(),age.val(),ph);}
-        else{showPopup(errmsg);}
-      });
+                            errmsg += "age cannot be empty" + "\n";
+                        }
 
-    function opendb(){
-      db = window.sqlitePlugin.openDatabase({name: 'demo.db', location: 'default'});
-      console.log("db opened");
-      db.transaction(function(tx) {
-        tx.executeSql('CREATE TABLE IF NOT EXISTS DemoTable (name TEXT, email TEXT PRIMARY KEY,age INT,picture TEXT)');
-      }, function(error) {
-        console.log('Transaction ERROR: ' + error.message);
-        console.log("something went wrong");
-      }, function() {
-        console.log('Populated database OK');
-      });}
+                        if (errmsg.length < 1) {
+                            opendb();
+                            var ph = photo.prop("src");
+                            if (ph == emptyPhoto) {
+                                ph = "";
+                            }
 
-      function getPicture(e) {
-        db.executeSql('SELECT * FROM DemoTable WHERE email like "' + e+ '"', [], function(rs) {
-          if (rs.rows.length < 1) {showPopup("email does not exist"); return;}
-          var ph= rs.rows.item(0).picture;
-          if (ph.length<1) {ph=emptyPhoto;}
-          photo.prop('src', ph);
-          age.val(rs.rows.item(0).age);
-          email.val(rs.rows.item(0).email);
-          sname.val(rs.rows.item(0).name);
-          deletebtn.show();
-        }, function(error) {
-          showPopup("email does not exist");return;
-        });
-      }
-      function addEmail(dbname,dbemail,dbage,dbpicture) {
-        db.transaction(function(tx) {
-          tx.executeSql('REPLACE INTO  DemoTable VALUES (?,?,?,?)', [dbname, dbemail,dbage,dbpicture]);
-        }, function(error) {
-          console.log('Transaction ERROR: ' + error.message);
-          navigator.notification.alert("this email already exists", null, "DB Error", "Ok");
-        }, function() {
-          console.log('added to db');
-          navigator.notification.alert("information saved", null, "Save info", "Ok");
-          deletebtn.hide();
-        });
-      }
-      function takePhoto() {
-        var options = { quality: 25,
-          destinationType: Camera.DestinationType.FILE_URI,
-          cameraDirection: Camera.Direction.FRONT,
-          encodingType: Camera.EncodingType.JPEG,
-          correctOrientation: true,
-          allowEdit: true
-        };
-        navigator.camera.getPicture(cameraSuccess, cameraError, options);
-      }
-      function cameraSuccess(imageData){
-        photo.attr("src",imageData);
-        console.log("the picture:",imageData);
-        deletebtn.show();
-      }
-      function cameraError(errorData){
-        navigator.notification.alert("Error: " + JSON.stringify(errorData),
-        null, "Camera Error", "Ok");
-      }
+                            addEmail(sname.val(), email.val(), age.val(), ph);
 
-      function showPopup(msg){
-        $pop.html("<p>"+msg+"</p>").popup("open");
-        setTimeout(function() {$pop.popup("close")}, 3000);
-      }
-}
+                        } else {
+                            showPopup(errmsg);
+                        }
+                    });
+
+                    function opendb() {
+                        db = window.sqlitePlugin.openDatabase({name: 'demo.db', location: 'default'});
+                        console.log("db opened");
+                        db.transaction(function (tx) {
+                            tx.executeSql('CREATE TABLE IF NOT EXISTS DemoTable (name TEXT, email TEXT PRIMARY KEY,age INT,picture TEXT)');
+                        }, function (error) {
+                            console.log('Transaction ERROR: ' + error.message);
+                            console.log("something went wrong");
+                        }, function () {
+                            console.log('Populated database OK');
+                        });
+                    }
+
+                    function getPicture(e) {
+                        opendb();
+                        db.executeSql('SELECT * FROM DemoTable WHERE email like "' + e + '"', [], function (rs) {
+                            if (rs == null || rs.rows.length < 1) {
+                                showPopup("email does not exist");
+                                return;
+                            }
+                            var ph = rs.rows.item(0).picture;
+                            if (ph.length < 1) {
+                                ph = emptyPhoto;
+                            }
+                            photo.prop('src', ph);
+                            age.val(rs.rows.item(0).age);
+                            email.val(rs.rows.item(0).email);
+                            sname.val(rs.rows.item(0).name);
+                            deletebtn.show();
+                        }, function (error) {
+                            showPopup("email does not exist");
+                            return;
+                        });
+                    }
+                    function addEmail(dbname, dbemail, dbage, dbpicture) {
+                        db.transaction(function (tx) {
+                            tx.executeSql('REPLACE INTO  DemoTable VALUES (?,?,?,?)', [dbname, dbemail, dbage, dbpicture]);
+                        }, function (error) {
+                            console.log('Transaction ERROR: ' + error.message);
+                            navigator.notification.alert("this email already exists", null, "DB Error", "Ok");
+                        }, function () {
+                            console.log('added to db');
+                            navigator.notification.alert("information saved", null, "Save info", "Ok");
+                            deletebtn.hide();
+                            photo.attr('src', '');
+                            age.val(20);
+                            email.val('');
+                            sname.val('');
+
+                        });
+                    }
+                    function takePhoto() {
+                        var options = {quality: 25,
+                            destinationType: Camera.DestinationType.FILE_URI,
+                            cameraDirection: Camera.Direction.FRONT,
+                            encodingType: Camera.EncodingType.JPEG,
+                            correctOrientation: true,
+                            allowEdit: true
+                        };
+                        navigator.camera.getPicture(cameraSuccess, cameraError, options);
+                    }
+                    function cameraSuccess(imageData) {
+                        photo.attr("src", imageData);
+                        console.log("the picture:", imageData);
+                        deletebtn.show();
+                    }
+                    function cameraError(errorData) {
+                        navigator.notification.alert("Error: " + JSON.stringify(errorData),
+                                null, "Camera Error", "Ok");
+                    }
+
+                    function showPopup(msg) {
+                        $pop.html("<p>" + msg + "</p>").popup("open");
+                        setTimeout(function () {
+                            $pop.popup("close")
+                        }, 3000);
+                    }
+                }
